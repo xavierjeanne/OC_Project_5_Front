@@ -1,0 +1,44 @@
+.best-movie{
+    border: 6px solid black;
+    padding: 10px;
+}
+
+.best-movie--image{
+    height: 240px;
+    max-width: 100%;
+    background-size: cover;
+}
+.best-movie__description--p{
+    font-weight: 200; 
+}
+.best-movies__card{
+    height: 320px;
+    background-color: #61787F;
+    background-size: cover;
+    width: 100%;
+}
+.best-movies__card--description{
+    position: absolute;
+    top: 40px;
+    padding: 20px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+}
+@media screen and (min-width: 768px) {
+    .best-movie__description{
+        padding:0px 30px;
+    }
+    .best-movie__description--p{
+        font-size: 1.5rem;
+    }
+    .best-movie--image{
+        height: 330px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .best-movies__card{
+            height: 400px;
+    }
+  
+}
