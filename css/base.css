@@ -48,6 +48,16 @@ h3{
     -webkit-appearance: none;
     -moz-appearance: none;
 }
+.category-selector{
+    max-width: 90%;
+    margin:auto;
+}
+.category-selector select{
+    font-weight: 600;
+    font-size: 2.25rem;
+    width: 100%;
+    
+}
 @media (min-width:768px){
     h2{
         font-size: 2.5rem;

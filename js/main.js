@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Afficher les films par genre (exemples de genres)
     await displayMoviesByGenre('Sci-fi');
     await displayMoviesByGenre('Action');
-    
+    await populateCategorySelect();
 });
 
 // Fonction pour afficher le meilleur film
@@ -70,31 +70,43 @@ async function displayBestRatedMovies() {
         
         best += '</div>';
         best += `
-            <div class="text-center mt-2 mb-5">
-                <button id="see-more-btn" class="info-btn see-more">Voir plus</button>
+            <div class="text-center mt-2 mb-5 toggle-buttons">
+                <button id="see-more-btn-best-rated" class="info-btn see-more">Voir plus</button>
             </div>
         `;
         
         bestMovieCategorySection.innerHTML = best;
-        handleResponsiveDisplay();
         
-        // Add event listener for window resize
-        window.addEventListener('resize', handleResponsiveDisplay);
+        // Initialize responsive display
+        const movieItems = bestMovieCategorySection.querySelectorAll('.movie-item');
+        const windowWidth = window.innerWidth;
         
-        // Add event listener for the "Voir plus" button
-        const seeMoreBtn = document.getElementById('see-more-btn');
-        if (seeMoreBtn) {
-            seeMoreBtn.addEventListener('click', function() {
-                const movieItems = bestMovieCategorySection.querySelectorAll('.movie-item');
-                
-                // Show all hidden movies
-                movieItems.forEach(movie => {
-                    movie.classList.remove('d-none');
-                });
-                
-                // Hide the "Voir plus" button after showing all movies
-                this.style.display = 'none';
-            });
+        // Set initial movies to show based on screen size
+        let initialMoviesToShow;
+        if (windowWidth < 768) {
+            // Mobile: show 2
+            initialMoviesToShow = 2;
+        } else if (windowWidth < 992) {
+            // Tablet: show 4
+            initialMoviesToShow = 4;
+        } else {
+            // Desktop: show 6
+            initialMoviesToShow = 6;
+        }
+        
+        // Hide movies beyond the initial count
+        movieItems.forEach((item, index) => {
+            if (index < initialMoviesToShow) {
+                item.classList.remove('d-none');
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+        
+        // Hide "Voir plus" button if all movies are shown
+        const seeMoreBtn = document.getElementById('see-more-btn-best-rated');
+        if (movieItems.length <= initialMoviesToShow) {
+            seeMoreBtn.style.display = 'none';
         }
         
         // Add event listeners for detail buttons
@@ -106,14 +118,166 @@ async function displayBestRatedMovies() {
                 showMovieModal(movieDetails);
             });
         });
+        
+        // Set up the "Voir plus" button
+        if (seeMoreBtn) {
+            // Define the functions outside to avoid reference issues
+            function showMoreMovies() {
+                const movieItems = bestMovieCategorySection.querySelectorAll('.movie-item');
+                
+                // Show all movies
+                movieItems.forEach(movie => {
+                    movie.classList.remove('d-none');
+                });
+                
+                // Change button text and functionality
+                this.textContent = 'Voir moins';
+                this.id = 'see-less-btn-best-rated';
+                
+                // Remove current listener and add the show less listener
+                this.removeEventListener('click', showMoreMovies);
+                this.addEventListener('click', showLessMovies);
+            }
+            
+            function showLessMovies() {
+                const movieItems = bestMovieCategorySection.querySelectorAll('.movie-item');
+                
+                // Get window width
+                const windowWidth = window.innerWidth;
+                
+                // Set movies to show based on screen size
+                let moviesToShow;
+                if (windowWidth < 768) {
+                    // Mobile: show 2
+                    moviesToShow = 2;
+                } else if (windowWidth < 992) {
+                    // Tablet: show 4
+                    moviesToShow = 4;
+                } else {
+                    // Desktop: show 6
+                    moviesToShow = 6;
+                }
+                
+                // Hide movies beyond the count
+                movieItems.forEach((item, index) => {
+                    if (index < moviesToShow) {
+                        item.classList.remove('d-none');
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+                
+                // Change button text and functionality
+                this.textContent = 'Voir plus';
+                this.id = 'see-more-btn-best-rated';
+                
+                // Remove current listener and add the show more listener
+                this.removeEventListener('click', showLessMovies);
+                this.addEventListener('click', showMoreMovies);
+            }
+            
+            // Add initial event listener
+            seeMoreBtn.addEventListener('click', showMoreMovies);
+        }
+        
+        // Add window resize handler
+        window.addEventListener('resize', function() {
+            const seeBtn = document.getElementById('see-more-btn-best-rated') || 
+                          document.getElementById('see-less-btn-best-rated');
+            
+            if (seeBtn) {
+                const windowWidth = window.innerWidth;
+                const movieItems = bestMovieCategorySection.querySelectorAll('.movie-item');
+                
+                // Set initial movies to show based on screen size
+                let initialMoviesToShow;
+                if (windowWidth < 768) {
+                    // Mobile: show 2
+                    initialMoviesToShow = 2;
+                } else if (windowWidth < 992) {
+                    // Tablet: show 4
+                    initialMoviesToShow = 4;
+                } else {
+                    // Desktop: show 6
+                    initialMoviesToShow = 6;
+                }
+                
+                // If we're showing "Voir plus" button, update the display
+                if (seeBtn.id === 'see-more-btn-best-rated') {
+                    // Hide movies beyond the initial count
+                    movieItems.forEach((item, index) => {
+                        if (index < initialMoviesToShow) {
+                            item.classList.remove('d-none');
+                        } else {
+                            item.classList.add('d-none');
+                        }
+                    });
+                }
+                
+                // Hide button if all movies are shown
+                if (movieItems.length <= initialMoviesToShow) {
+                    seeBtn.style.display = 'none';
+                } else {
+                    seeBtn.style.display = 'inline-block';
+                }
+            }
+        });
     }
 }
 
+async function populateCategorySelect() {
+    const genres = await fetchAllGenres();
+    if (!genres) return;
+    
+    const categorySelect = document.getElementById('category-select');
+    if (!categorySelect) return;
+    
+    // Clear existing options except the first one
+    while (categorySelect.options.length > 1) {
+        categorySelect.remove(1);
+    }
+    
+    // Check if genres is an array, if not, handle accordingly
+    if (Array.isArray(genres)) {
+        // Add genre options
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre.name;
+            option.textContent = genre.name;
+            categorySelect.appendChild(option);
+        });
+    } else if (typeof genres === 'object') {
+        // If genres is an object, try to extract values
+        const genreList = Object.values(genres);
+        if (Array.isArray(genreList)) {
+            genreList.forEach(genre => {
+                if (typeof genre === 'string') {
+                    const option = document.createElement('option');
+                    option.value = genre;
+                    option.textContent = genre;
+                    categorySelect.appendChild(option);
+                }
+            });
+        }
+    }
+    
+    // Add event listener for category change
+    categorySelect.addEventListener('change', function() {
+        const selectedGenre = this.value;
+        if (selectedGenre) {
+            displayMoviesByGenre(selectedGenre, 'categrories-section');
+        }
+    });
+}
 // Fonction pour afficher les films par genre
-async function displayMoviesByGenre(genre) {
+async function displayMoviesByGenre(genre, sectionId = null) {
     const movies = await getMoviesByGenre(genre);
     if (!movies) return;
-    let genreSection = document.getElementById(`${genre.toLowerCase()}-section`);
+    
+    // Use provided sectionId or default to genre-section
+    const targetSectionId = sectionId || `${genre.toLowerCase()}-section`;
+    let genreSection = document.getElementById(targetSectionId);
+    
     if(genreSection){
         let best = '<div class="best-movies row pt-lg-5">';
         
@@ -136,7 +300,7 @@ async function displayMoviesByGenre(genre) {
         best += '</div>';
         best += `
             <div class="text-center mt-2 mb-5 toggle-buttons">
-                <button id="see-less-btn-${genre.toLowerCase()}" class="info-btn see-less d-inline-block d-md-inline-block d-lg-none">Voir moins</button>
+                <button id="see-less-btn-${targetSectionId}" class="info-btn see-less d-inline-block d-md-inline-block d-lg-none">Voir moins</button>
             </div>
         `;
         
@@ -153,7 +317,7 @@ async function displayMoviesByGenre(genre) {
         });
         
         // Set up the "Voir moins" button
-        const seeLessBtn = document.getElementById(`see-less-btn-${genre.toLowerCase()}`);
+        const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`);
         if (seeLessBtn) {
             // Define the functions outside to avoid reference issues
             function showLessMovies() {
@@ -186,7 +350,7 @@ async function displayMoviesByGenre(genre) {
                 
                 // Change button text and functionality
                 this.textContent = 'Voir plus';
-                this.id = `see-more-btn-${genre.toLowerCase()}`;
+                this.id = `see-more-btn-${targetSectionId}`;
                 
                 // Remove current listener and add the show more listener
                 this.removeEventListener('click', showLessMovies);
@@ -203,7 +367,7 @@ async function displayMoviesByGenre(genre) {
                 
                 // Change button text and functionality back
                 this.textContent = 'Voir moins';
-                this.id = `see-less-btn-${genre.toLowerCase()}`;
+                this.id = `see-less-btn-${targetSectionId}`;
                 
                 // Remove current listener and add the show less listener
                 this.removeEventListener('click', showMoreMovies);
@@ -216,8 +380,8 @@ async function displayMoviesByGenre(genre) {
         
         // Add window resize handler to show/hide the button based on screen size
         window.addEventListener('resize', function() {
-            const seeLessBtn = document.getElementById(`see-less-btn-${genre.toLowerCase()}`) || 
-                              document.getElementById(`see-more-btn-${genre.toLowerCase()}`);
+            const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`) || 
+                              document.getElementById(`see-more-btn-${targetSectionId}`);
             
             if (seeLessBtn) {
                 const windowWidth = window.innerWidth;

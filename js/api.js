@@ -34,11 +34,36 @@ async function getBestMovie() {
 }
 
 // Fonction pour récupérer les détails d'un film
-async function getMovieDetails(movieId) {
-    return await fetchFromAPI(`/titles/${movieId}`);
+// Add this function to check if an image URL is valid
+async function isImageValid(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
 }
 
-// Fonction pour récupérer les films les mieux notés
+// Modify your getMovieDetails function to handle image validation
+async function getMovieDetails(movieId) {
+    const movie = await fetchFromAPI(`/titles/${movieId}`);
+    
+    if (movie) {
+        // Check if the image URL is valid, if not, use a placeholder
+        if (movie.image_url) {
+            const isValid = await isImageValid(movie.image_url);
+            if (!isValid) {
+                movie.image_url = 'img/logo.png'; // Path to your placeholder image
+            }
+        } else {
+            movie.image_url = 'img/logo.png';
+        }
+    }
+    
+    return movie;
+}
+
+// Update getBestRatedMovies to handle image validation
 async function getBestRatedMovies(limit = 6) {
     const data = await fetchFromAPI('/titles/', {
         sort_by: '-imdb_score,-votes',
@@ -46,10 +71,25 @@ async function getBestRatedMovies(limit = 6) {
         page_size: limit
     });
     
-    return data && data.results ? data.results : [];
+    if (data && data.results) {
+        // Check each movie's image URL
+        for (const movie of data.results) {
+            if (movie.image_url) {
+                const isValid = await isImageValid(movie.image_url);
+                if (!isValid) {
+                    movie.image_url = 'img/logo.png';
+                }
+            } else {
+                movie.image_url = 'img/logo.png';
+            }
+        }
+        return data.results;
+    }
+    
+    return [];
 }
 
-// Fonction pour récupérer les films par genre
+// Update getMoviesByGenre to handle image validation
 async function getMoviesByGenre(genre, limit = 6) {
     const data = await fetchFromAPI('/titles/', {
         genre: genre,
@@ -57,5 +97,59 @@ async function getMoviesByGenre(genre, limit = 6) {
         page_size: limit
     });
     
-    return data && data.results ? data.results : [];
+    if (data && data.results) {
+        // Check each movie's image URL
+        for (const movie of data.results) {
+            if (movie.image_url) {
+                const isValid = await isImageValid(movie.image_url);
+                if (!isValid) {
+                    movie.image_url = 'img/logo.png';
+                }
+            } else {
+                movie.image_url = 'img/logo.png';
+            }
+        }
+        return data.results;
+    }
+    
+    return [];
+}
+
+// Fonction pour récupérer tous les genres
+async function fetchAllGenres() {
+    try {
+        // First, get the initial page to determine how many pages there are
+        const firstPage = await fetchFromAPI('/genres/');
+        if (!firstPage) return [];
+        
+        // Extract the genres from the first page
+        let allGenres = firstPage.results || [];
+        
+        // If there are more pages, fetch them
+        if (firstPage.next) {
+            // Continue fetching pages until there are no more
+            let nextPageUrl = firstPage.next;
+            while (nextPageUrl) {
+                // Parse the next URL to get the page parameter
+                const url = new URL(nextPageUrl);
+                const page = url.searchParams.get('page');
+                
+                // Fetch the next page using our fetchFromAPI function
+                const nextPage = await fetchFromAPI('/genres/', { page });
+                if (!nextPage || !nextPage.results) break;
+                
+                // Add the results to our collection
+                allGenres = [...allGenres, ...nextPage.results];
+                
+                // Update the next page URL
+                nextPageUrl = nextPage.next;
+            }
+        }
+        
+        // Return all collected genres
+        return allGenres;
+    } catch (error) {
+        console.error('Error fetching all genres:', error);
+        return [];
+    }
 }
