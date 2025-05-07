@@ -33,15 +33,33 @@ async function getBestMovie() {
     return null;
 }
 
-// Fonction pour récupérer les détails d'un film
-// Add this function to check if an image URL is valid
+
+// Improved function to check if an image URL is valid
 async function isImageValid(url) {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch (error) {
-        return false;
-    }
+    return new Promise((resolve) => {
+        // Create a new image object
+        const img = new Image();
+        
+        // Prevent error from appearing in console
+        img.addEventListener('error', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
+        
+        // Set up event handlers before setting src
+        img.onload = () => resolve(true);
+        img.onerror = () => {
+            // Image failed to load (404, CORS, etc.)
+            // Remove console.error to prevent any console output
+            resolve(false);
+        };
+        
+        // Set timeout in case image takes too long
+        setTimeout(() => resolve(false), 2000);
+        
+        // Set the source last
+        img.src = url;
+    });
 }
 
 // Modify your getMovieDetails function to handle image validation

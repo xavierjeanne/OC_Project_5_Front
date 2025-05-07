@@ -31,14 +31,18 @@
     .best-movie__description--p{
         font-size: 1.5rem;
     }
-    .best-movie--image{
-        height: 330px;
+    .best-movies__card{
+        height: 290px;
     }
+   
 }
 
 @media screen and (min-width: 1200px) {
     .best-movies__card{
-            height: 400px;
+            height: 330px;
+    }
+    .best-movie--image{
+        height: 330px;
     }
   
 }
