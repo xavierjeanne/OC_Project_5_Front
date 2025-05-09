@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Fonction pour afficher le meilleur film
 async function displayBestMovie() {
+    showLoader();
     const bestMovie = await getBestMovie();
+    hideLoader();
     if (!bestMovie) return;
     
     const bestMovieSection = document.getElementById('best-rated-section');
@@ -47,9 +49,11 @@ async function displayBestMovie() {
 
 // Fonction pour afficher les films les mieux notés
 async function displayBestRatedMovies() {
+    showLoader();
     const movies = await getBestRatedMovies();
+    hideLoader();
     if (!movies) return;
-
+    
         const bestMovieCategorySection = document.getElementById('best-rated-categories-section');
         if (bestMovieCategorySection) {
             let best = '<div class="best-movies row pt-lg-5">';
@@ -273,7 +277,9 @@ async function populateCategorySelect() {
 }
 // Fonction pour afficher les films par genre
 async function displayMoviesByGenre(genre, sectionId = null) {
+    showLoader();
     const movies = await getMoviesByGenre(genre);
+    hideLoader();
     if (!movies) return;
     
   
@@ -564,6 +570,7 @@ function setupMovieCards(container) {
 // Fonction pour afficher une modal avec les détails du film
 function showMovieModal(movie) {
     // Get the modal elements
+    showLoader();
     const modal = document.getElementById('movieModal');
     const modalImage = document.getElementById('modal-movie-image');
     const modalDetails = document.getElementById('modal-movie-details');
@@ -598,7 +605,15 @@ function showMovieModal(movie) {
     modal.addEventListener('hidden.bs.modal', function () {
         modal.setAttribute('aria-hidden', 'true');
     }, { once: true });
-
+    hideLoader();
     // Now show the modal
     bootstrapModal.show();
+}
+
+function showLoader() {
+    document.getElementById('loader-container').classList.remove('d-none');
+}
+
+function hideLoader() {
+    document.getElementById('loader-container').classList.add('d-none');
 }

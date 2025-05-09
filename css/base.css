@@ -58,6 +58,15 @@ h3{
     width: 100%;
     
 }
+#loader-container {
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
 @media (min-width:768px){
     h2{
         font-size: 2.5rem;
