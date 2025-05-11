@@ -34,7 +34,14 @@
     .best-movies__card{
         height: 290px;
     }
-   
+    .movies-select h2{
+        display:inline-block;
+    }
+    .category-selector{
+        display: inline-block;
+        margin-left: 20px;
+        width: 60%;
+    }
 }
 
 @media screen and (min-width: 1200px) {

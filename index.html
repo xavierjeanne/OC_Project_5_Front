@@ -50,12 +50,10 @@
         </section>
         <!-- Categorie section -->
         <section class="movies-section row">
-            <div class="col-12 col-md-3">
+            <div class="col-12 movies-select">
                 <h2 class="text-center text-md-start">Autres : </h2>
-            </div>
-            <div class="col-12 col-md-9">
                 <div class="category-selector mb-3">
-                    <select id="category-select" >
+                    <select id="category-select">
                         <option value="" selected disabled>Choisir une catégorie</option>
                         
                     </select>
@@ -70,23 +68,28 @@
     <!-- Movie Details Modal -->
     <div class="modal fade" id="movieModal" tabindex="-1" >
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+            <div class="modal-content p-2">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-10 col-lg-6 text-start">
+                        <div class="col-10 col-lg-6 ">
                             <h2 class="modal-title" id="modal-movie-title"></h2>
                             <div id="modal-movie-details">
-                               
+                                
                             </div>
                         </div>
-                        <div class="col-2 col-lg-6 text-end">
+                        <div class="col-2 col-lg-6 d-flex justify-content-end">
                             <button type="button" class="btn-close d-lg-none" data-bs-dismiss="modal" aria-label="Close"></button>
                             <img id="modal-movie-image" src="" alt="Movie Poster" class="img-fluid mb-3 d-none d-lg-block">
                         </div>
+                        <div class="col-12">
+                            <div id="modal-movie-description">
+                                    
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer d-none d-lg-block">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <div class="d-none d-lg-block text-center mb-4">
+                    <button type="button" class="btn info-btn" data-bs-dismiss="modal">Fermer</button>
                 </div>
             </div>
         </div>

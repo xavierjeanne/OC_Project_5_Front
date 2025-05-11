@@ -1,12 +1,8 @@
-// Attendre que le DOM soit complètement chargé
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // Afficher le meilleur film
+   
     await displayBestMovie();
-    
-    // Afficher les films les mieux notés
     await displayBestRatedMovies();
-    
-    // Afficher les films par genre (exemples de genres)
     await displayMoviesByGenre('Sci-fi');
     await displayMoviesByGenre('Sport');
     await populateCategorySelect();
@@ -14,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-// Fonction pour afficher le meilleur film
 async function displayBestMovie() {
     showLoader();
     const bestMovie = await getBestMovie();
@@ -47,7 +42,7 @@ async function displayBestMovie() {
     }
 }
 
-// Fonction pour afficher les films les mieux notés
+
 async function displayBestRatedMovies() {
     showLoader();
     const movies = await getBestRatedMovies();
@@ -275,7 +270,7 @@ async function populateCategorySelect() {
         }
     });
 }
-// Fonction pour afficher les films par genre
+
 async function displayMoviesByGenre(genre, sectionId = null) {
     showLoader();
     const movies = await getMoviesByGenre(genre);
@@ -416,7 +411,7 @@ async function displayMoviesByGenre(genre, sectionId = null) {
     
 }
 
-// Fonction pour configurer les écouteurs d'événements des boutons de film
+
 function setupMovieButtons(container) {
     const infoButtons = container.querySelectorAll('.info-btn');
     
@@ -554,7 +549,7 @@ function handleGenreResponsiveDisplay(section, genreId) {
         showInitialMovies();
     });
 }
-// Fonction pour configurer les écouteurs d'événements des cartes de films
+
 function setupMovieCards(container) {
     const movieCards = container.querySelectorAll('.movie-card');
     
@@ -567,13 +562,14 @@ function setupMovieCards(container) {
     });
 }
 
-// Fonction pour afficher une modal avec les détails du film
+
 function showMovieModal(movie) {
     // Get the modal elements
     showLoader();
     const modal = document.getElementById('movieModal');
     const modalImage = document.getElementById('modal-movie-image');
     const modalDetails = document.getElementById('modal-movie-details');
+    const modalDescription = document.getElementById('modal-movie-description');
     const modalTitle = document.getElementById('modal-movie-title');
     
     
@@ -589,15 +585,17 @@ function showMovieModal(movie) {
         Score IMDb : ${movie.imdb_score ? movie.imdb_score +'/10' : 'Non spécifié'}<br/>
         Recette aux box-office : ${movie.worldwide_gross_income? '$'+ movie.worldwide_gross_income  : 'Recette non spécifiée'}
         </strong>
-        <p class="mt-5"><strong>Réalisateur:<br/></strong> ${movie.directors ? movie.directors.join(', ') : 'Réalisateur non spécifié'}<br/>
-        ${movie.long_description || 'Résumé non spécifié'}  </p> 
-        <img  src="${movie.image_url}" alt="Movie Poster" class="img-fluid mb-3 d-block d-lg-none">
-        <p class="mt-5"><strong>Avec:<br/></strong> ${movie.actors ? movie.actors.join(', ') : 'Distribution non spécifiée'}<br/>
+        <p class="mt-3 mb-0"><strong>Réalisé par:<br/></strong> ${movie.directors ? movie.directors.join(', ') : 'Réalisé par'}<br/></p>
     `;
     
     // Set the details HTML
     modalDetails.innerHTML = detailsHTML;
-
+    const descriptionModal =  `
+        <p>${movie.long_description || 'Résumé non spécifié'}  </p> 
+        <img  src="${movie.image_url}" alt="Movie Poster" class="img-fluid m-auto mb-3 d-block d-lg-none">
+        <p class="mt-5"><strong>Avec:<br/></strong> ${movie.actors ? movie.actors.join(', ') : 'Distribution non spécifiée'}<br/>
+    `;
+    modalDescription.innerHTML = descriptionModal;
     // Initialize the modal using Bootstrap
     const bootstrapModal = new bootstrap.Modal(modal);
 

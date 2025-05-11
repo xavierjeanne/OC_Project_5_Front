@@ -17,6 +17,18 @@ h3{
     font-size: 2rem;
     margin-top: 10px;
 }
+.btn-close {
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ff0000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1.2em auto no-repeat;
+    opacity: 1;
+    width: 1.2em;
+    height: 1.2em;
+    position: relative;
+    top: 10px;
+}
+
+.btn-close-red:hover {
+    opacity: 1;
+}
 .info-btn{
     color: white;
     background-color: #FA0B0B;
@@ -30,6 +42,10 @@ h3{
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+}
+.modal .info-btn{
+    font-size :0.8rem;
+    padding: 5px 50px;
 }
 .see-more{
     padding: 5px 70px;
@@ -56,7 +72,38 @@ h3{
     font-weight: 600;
     font-size: 2.25rem;
     width: 100%;
-    
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding:5px 10px;
+    border: 1px solid #000000;
+    background-color: white;
+}
+.category-selector option {
+    font-weight: 600;
+    font-size: 2.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    position: relative;
+    background-color: white;
+    color: black;
+}
+.category-selector option:checked {
+    background-color: white;
+    color: black;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3e%3cpath fill='%2300cc00' d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 24px 24px;
+}
+.category-selector option:hover {
+    background-color: #E7E7E7;
+}
+.category-selector option:focus {
+    background-color: #E7E7E7;
 }
 #loader-container {
     background-color: rgba(0, 0, 0, 0.5);
@@ -102,4 +149,4 @@ h3{
         font-size:1.5rem;
     }
 
-}    
+}
