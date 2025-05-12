@@ -262,6 +262,9 @@ async function populateCategorySelect() {
         }
     }
     
+    // Create custom dropdown after populating the select
+    createCustomDropdown(categorySelect);
+    
     // Add event listener for category change
     categorySelect.addEventListener('change', function() {
         const selectedGenre = this.value;
@@ -269,6 +272,112 @@ async function populateCategorySelect() {
             displayMoviesByGenre(selectedGenre, 'categrories-section');
         }
     });
+}
+
+
+function createCustomDropdown(select) {
+    if (!select) return;
+    
+    // Create container for custom dropdown
+    const customDropdownContainer = document.createElement('div');
+    customDropdownContainer.className = 'custom-dropdown-container';
+    
+    // Create selected display
+    const selectedDisplay = document.createElement('div');
+    selectedDisplay.className = 'selected-option';
+    
+    // Create dropdown list
+    const dropdownList = document.createElement('div');
+    dropdownList.className = 'dropdown-list';
+    
+    // Add dropdown items
+    const dropdownItems = [];
+    Array.from(select.options).forEach((option, index) => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        if (option.selected) item.classList.add('selected');
+        
+        const text = document.createElement('span');
+        text.textContent = option.text;
+        
+        const checkmark = document.createElement('span');
+        checkmark.className = 'checkmark';
+        checkmark.innerHTML = '✓';
+        
+        item.appendChild(text);
+        item.appendChild(checkmark);
+        dropdownList.appendChild(item);
+        dropdownItems.push(item);
+        
+        // Handle item click
+        item.addEventListener('click', () => {
+            // Update select value
+            select.selectedIndex = index;
+            
+            // Update UI
+            document.querySelectorAll('.dropdown-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            item.classList.add('selected');
+            selectedDisplay.textContent = option.text;
+            
+            // Hide dropdown
+            dropdownList.classList.remove('show');
+            
+            // Trigger change event
+            const event = new Event('change');
+            select.dispatchEvent(event);
+        });
+    });
+   
+    
+    const firstOptionIndex = Array.from(select.options).findIndex(option => !option.disabled);
+    if (firstOptionIndex > 0) {
+        // Set the select value
+        select.selectedIndex = firstOptionIndex;
+        
+        // Update UI
+        dropdownItems.forEach((item, index) => {
+            item.classList.remove('selected');
+            if (index === firstOptionIndex) {
+                item.classList.add('selected');
+                selectedDisplay.textContent = select.options[firstOptionIndex].text;
+            }
+        });
+        
+        // Trigger change event to load the first category
+        const event = new Event('change');
+        select.dispatchEvent(event);
+        
+        // Directly call the display function with the selected genre
+        const selectedGenre = select.options[firstOptionIndex].value;
+        if (selectedGenre) {
+            displayMoviesByGenre(selectedGenre, 'categrories-section');
+        }
+    } else {
+        // If no valid option found, use the placeholder text
+        selectedDisplay.textContent = select.options[0].text;
+    }
+    
+    // Toggle dropdown on click
+    selectedDisplay.addEventListener('click', () => {
+        dropdownList.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!customDropdownContainer.contains(e.target)) {
+            dropdownList.classList.remove('show');
+        }
+    });
+    
+    // Add elements to DOM
+    customDropdownContainer.appendChild(selectedDisplay);
+    customDropdownContainer.appendChild(dropdownList);
+    
+    // Replace select with custom dropdown
+    select.parentNode.insertBefore(customDropdownContainer, select);
+    select.style.display = 'none';
 }
 
 async function displayMoviesByGenre(genre, sectionId = null) {
