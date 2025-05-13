@@ -1,4 +1,4 @@
-
+// Initialize the application when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
    
     await displayBestMovie();
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-
+// Display the highest rated movie in the featured section
 async function displayBestMovie() {
     showLoader();
     const bestMovie = await getBestMovie();
@@ -37,12 +37,12 @@ async function displayBestMovie() {
             </div>
         `;
         
-        // Ajouter des écouteurs d'événements pour les boutons
+        // add listener to the button
         setupMovieButtons(bestMovieSection);
     }
 }
 
-
+// Display a section of best rated movies with responsive behavior
 async function displayBestRatedMovies() {
     showLoader();
     const movies = await getBestRatedMovies();
@@ -53,7 +53,6 @@ async function displayBestRatedMovies() {
         if (bestMovieCategorySection) {
             let best = '<div class="best-movies row pt-lg-5">';
             
-            // We'll handle visibility with JavaScript based on screen size
             movies.forEach((movie) => {
                 best += `
                     <div class="col-12 col-md-6 col-lg-4 pb-4 movie-item" data-movie-id="${movie.id}" >
@@ -112,6 +111,7 @@ async function displayBestRatedMovies() {
             
             // Add event listeners for detail buttons
             const detailButtons = bestMovieCategorySection.querySelectorAll('.detail-btn');
+
             detailButtons.forEach(button => {
                 button.addEventListener('click', async () => {
                     const movieId = button.getAttribute('data-movie-id');
@@ -226,6 +226,7 @@ async function displayBestRatedMovies() {
         }
 }
 
+// Populate the category dropdown with available movie genres
 async function populateCategorySelect() {
     const genres = await fetchAllGenres();
     if (!genres) return;
@@ -274,7 +275,149 @@ async function populateCategorySelect() {
     });
 }
 
+// Display movies based on a specific genre
+async function displayMoviesByGenre(genre, sectionId = null) {
+    showLoader();
+    const movies = await getMoviesByGenre(genre);
+    hideLoader();
+    if (!movies) return;
+    
+  
+    // Use provided sectionId or default to genre-section
+        const targetSectionId = sectionId || `${genre.toLowerCase()}-section`;
+        let genreSection = document.getElementById(targetSectionId);
+        
+        if(genreSection){
+            let best = '<div class="best-movies row pt-lg-5">';
+            
+            // Always show all movies initially
+            movies.forEach((movie) => {
+                best += `
+                    <div class="col-12 col-md-6 col-lg-4 pb-4 movie-item" data-movie-id="${movie.id}" >
+                        <div class="best-movies__card position-relative overflow-hidden" style="background-image: url('${movie.image_url}')">
+                            <div class="best-movies__card--description w-100">
+                                <h3>${movie.title}</h3>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button class="detail-btn" data-movie-id="${movie.id}">Détails</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            best += '</div>';
+            best += `
+                <div class="text-center mt-2 mb-5 toggle-buttons">
+                    <button id="see-less-btn-${targetSectionId}" class="info-btn see-less d-inline-block d-md-inline-block d-lg-none">Voir moins</button>
+                </div>
+            `;
+            
+            genreSection.innerHTML = best;
+            
+            // Add event listeners for detail buttons
+            const detailButtons = genreSection.querySelectorAll('.detail-btn');
 
+            detailButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const movieId = button.getAttribute('data-movie-id');
+                    const movieDetails = await getMovieDetails(movieId);
+                    showMovieModal(movieDetails);
+                });
+            });
+            
+            // Set up the "Voir moins" button
+            const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`);
+            if (seeLessBtn) {
+                // Define the functions outside to avoid reference issues
+                function showLessMovies() {
+                    const movieItems = genreSection.querySelectorAll('.movie-item');
+                    
+                    // Get window width
+                    const windowWidth = window.innerWidth;
+                    
+                    // Set movies to show based on screen size
+                    let moviesToShow;
+                    if (windowWidth < 768) {
+                        // Mobile: show 2
+                        moviesToShow = 2;
+                    } else if (windowWidth < 992) {
+                        // Tablet: show 4
+                        moviesToShow = 4;
+                    } else {
+                        // Desktop: show all (no button needed)
+                        return;
+                    }
+                    
+                    // Hide movies beyond the count
+                    movieItems.forEach((item, index) => {
+                        if (index < moviesToShow) {
+                            item.classList.remove('d-none');
+                        } else {
+                            item.classList.add('d-none');
+                        }
+                    });
+                    
+                    // Change button text and functionality
+                    this.textContent = 'Voir plus';
+                    this.id = `see-more-btn-${targetSectionId}`;
+                    
+                    // Remove current listener and add the show more listener
+                    this.removeEventListener('click', showLessMovies);
+                    this.addEventListener('click', showMoreMovies);
+                }
+                
+                function showMoreMovies() {
+                    const movieItems = genreSection.querySelectorAll('.movie-item');
+                    
+                    // Show all movies
+                    movieItems.forEach(movie => {
+                        movie.classList.remove('d-none');
+                    });
+                    
+                    // Change button text and functionality back
+                    this.textContent = 'Voir moins';
+                    this.id = `see-less-btn-${targetSectionId}`;
+                    
+                    // Remove current listener and add the show less listener
+                    this.removeEventListener('click', showMoreMovies);
+                    this.addEventListener('click', showLessMovies);
+                }
+                
+                // Add initial event listener
+                seeLessBtn.addEventListener('click', showLessMovies);
+            }
+            
+            // Add window resize handler to show/hide the button based on screen size
+            window.addEventListener('resize', function() {
+                const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`) || 
+                                document.getElementById(`see-more-btn-${targetSectionId}`);
+                
+                if (seeLessBtn) {
+                    const windowWidth = window.innerWidth;
+                    
+                    if (windowWidth >= 992) {
+                        // Desktop: hide button
+                        seeLessBtn.classList.add('d-none');
+                        seeLessBtn.classList.remove('d-inline-block');
+                        
+                        // Show all movies
+                        const movieItems = genreSection.querySelectorAll('.movie-item');
+                        movieItems.forEach(movie => {
+                            movie.classList.remove('d-none');
+                        });
+                    } else {
+                        // Mobile/Tablet: show button
+                        seeLessBtn.classList.remove('d-none');
+                        seeLessBtn.classList.add('d-inline-block');
+                    }
+                }
+            });
+        }   
+    
+}
+
+// Create a custom styled dropdown menu from a select element
 function createCustomDropdown(select) {
     if (!select) return;
     
@@ -380,147 +523,7 @@ function createCustomDropdown(select) {
     select.style.display = 'none';
 }
 
-async function displayMoviesByGenre(genre, sectionId = null) {
-    showLoader();
-    const movies = await getMoviesByGenre(genre);
-    hideLoader();
-    if (!movies) return;
-    
-  
-    // Use provided sectionId or default to genre-section
-        const targetSectionId = sectionId || `${genre.toLowerCase()}-section`;
-        let genreSection = document.getElementById(targetSectionId);
-        
-        if(genreSection){
-            let best = '<div class="best-movies row pt-lg-5">';
-            
-            // Always show all movies initially
-            movies.forEach((movie) => {
-                best += `
-                    <div class="col-12 col-md-6 col-lg-4 pb-4 movie-item" data-movie-id="${movie.id}" >
-                        <div class="best-movies__card position-relative overflow-hidden" style="background-image: url('${movie.image_url}')">
-                            <div class="best-movies__card--description w-100">
-                                <h3>${movie.title}</h3>
-                                <div class="d-flex justify-content-end mt-3">
-                                    <button class="detail-btn" data-movie-id="${movie.id}">Détails</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            best += '</div>';
-            best += `
-                <div class="text-center mt-2 mb-5 toggle-buttons">
-                    <button id="see-less-btn-${targetSectionId}" class="info-btn see-less d-inline-block d-md-inline-block d-lg-none">Voir moins</button>
-                </div>
-            `;
-            
-            genreSection.innerHTML = best;
-            
-            // Add event listeners for detail buttons
-            const detailButtons = genreSection.querySelectorAll('.detail-btn');
-            detailButtons.forEach(button => {
-                button.addEventListener('click', async () => {
-                    const movieId = button.getAttribute('data-movie-id');
-                    const movieDetails = await getMovieDetails(movieId);
-                    showMovieModal(movieDetails);
-                });
-            });
-            
-            // Set up the "Voir moins" button
-            const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`);
-            if (seeLessBtn) {
-                // Define the functions outside to avoid reference issues
-                function showLessMovies() {
-                    const movieItems = genreSection.querySelectorAll('.movie-item');
-                    
-                    // Get window width
-                    const windowWidth = window.innerWidth;
-                    
-                    // Set movies to show based on screen size
-                    let moviesToShow;
-                    if (windowWidth < 768) {
-                        // Mobile: show 2
-                        moviesToShow = 2;
-                    } else if (windowWidth < 992) {
-                        // Tablet: show 4
-                        moviesToShow = 4;
-                    } else {
-                        // Desktop: show all (no button needed)
-                        return;
-                    }
-                    
-                    // Hide movies beyond the count
-                    movieItems.forEach((item, index) => {
-                        if (index < moviesToShow) {
-                            item.classList.remove('d-none');
-                        } else {
-                            item.classList.add('d-none');
-                        }
-                    });
-                    
-                    // Change button text and functionality
-                    this.textContent = 'Voir plus';
-                    this.id = `see-more-btn-${targetSectionId}`;
-                    
-                    // Remove current listener and add the show more listener
-                    this.removeEventListener('click', showLessMovies);
-                    this.addEventListener('click', showMoreMovies);
-                }
-                
-                function showMoreMovies() {
-                    const movieItems = genreSection.querySelectorAll('.movie-item');
-                    
-                    // Show all movies
-                    movieItems.forEach(movie => {
-                        movie.classList.remove('d-none');
-                    });
-                    
-                    // Change button text and functionality back
-                    this.textContent = 'Voir moins';
-                    this.id = `see-less-btn-${targetSectionId}`;
-                    
-                    // Remove current listener and add the show less listener
-                    this.removeEventListener('click', showMoreMovies);
-                    this.addEventListener('click', showLessMovies);
-                }
-                
-                // Add initial event listener
-                seeLessBtn.addEventListener('click', showLessMovies);
-            }
-            
-            // Add window resize handler to show/hide the button based on screen size
-            window.addEventListener('resize', function() {
-                const seeLessBtn = document.getElementById(`see-less-btn-${targetSectionId}`) || 
-                                document.getElementById(`see-more-btn-${targetSectionId}`);
-                
-                if (seeLessBtn) {
-                    const windowWidth = window.innerWidth;
-                    
-                    if (windowWidth >= 992) {
-                        // Desktop: hide button
-                        seeLessBtn.classList.add('d-none');
-                        seeLessBtn.classList.remove('d-inline-block');
-                        
-                        // Show all movies
-                        const movieItems = genreSection.querySelectorAll('.movie-item');
-                        movieItems.forEach(movie => {
-                            movie.classList.remove('d-none');
-                        });
-                    } else {
-                        // Mobile/Tablet: show button
-                        seeLessBtn.classList.remove('d-none');
-                        seeLessBtn.classList.add('d-inline-block');
-                    }
-                }
-            });
-        }   
-    
-}
-
-
+// Set up click event listeners for movie information buttons
 function setupMovieButtons(container) {
     const infoButtons = container.querySelectorAll('.info-btn');
     
@@ -533,6 +536,7 @@ function setupMovieButtons(container) {
     });
 }
 
+// Manage responsive display of movie cards based on screen size
 function handleResponsiveDisplay() {
     const bestMovieCategorySection = document.getElementById('best-rated-categories-section');
     if (!bestMovieCategorySection) return;
@@ -590,6 +594,7 @@ function handleResponsiveDisplay() {
     }
 }
 
+// Manage responsive display for genre-specific movie sections
 function handleGenreResponsiveDisplay(section, genreId) {
     if (!section) return;
     
@@ -659,22 +664,10 @@ function handleGenreResponsiveDisplay(section, genreId) {
     });
 }
 
-function setupMovieCards(container) {
-    const movieCards = container.querySelectorAll('.movie-card');
-    
-    movieCards.forEach(card => {
-        card.addEventListener('click', async () => {
-            const movieId = card.getAttribute('data-movie-id');
-            const movieDetails = await getMovieDetails(movieId);
-            showMovieModal(movieDetails);
-        });
-    });
-}
 
-
+// Display a modal with detailed movie information
 function showMovieModal(movie) {
     // Get the modal elements
-    showLoader();
     const modal = document.getElementById('movieModal');
     const modalImage = document.getElementById('modal-movie-image');
     const modalDetails = document.getElementById('modal-movie-details');
@@ -690,8 +683,8 @@ function showMovieModal(movie) {
     // Create the details HTML
     const detailsHTML = `
         <strong>${movie.year || 'Année non spécifié'} - ${movie.genres ? movie.genres.join(', ') : 'genre non spécifié'}<br/>
-        ${movie.rated ? 'PG-'+ movie.rated : 'Classement non spécifié'} - ${movie.duration ? movie.duration + ' minutes' : 'Durée non spécifié'} (${movie.countries ? movie.countries.join(' / ') : 'Pays non spécifié'})</br>
-        Score IMDb : ${movie.imdb_score ? movie.imdb_score +'/10' : 'Non spécifié'}<br/>
+        ${movie.rated ? movie.rated : 'Classement non spécifié'} - ${movie.duration ? movie.duration + ' minutes' : 'Durée non spécifié'} (${movie.countries ? movie.countries.join(' / ') : 'Pays non spécifié'})</br>
+        IMDB score: ${movie.imdb_score ? movie.imdb_score +'/10' : 'Non spécifié'}<br/>
         Recette aux box-office : ${movie.worldwide_gross_income? '$'+ movie.worldwide_gross_income  : 'Recette non spécifiée'}
         </strong>
         <p class="mt-3 mb-0"><strong>Réalisé par:<br/></strong> ${movie.directors ? movie.directors.join(', ') : 'Réalisé par'}<br/></p>
@@ -712,15 +705,16 @@ function showMovieModal(movie) {
     modal.addEventListener('hidden.bs.modal', function () {
         modal.setAttribute('aria-hidden', 'true');
     }, { once: true });
-    hideLoader();
     // Now show the modal
     bootstrapModal.show();
 }
 
+// Show loading spinner during API calls
 function showLoader() {
     document.getElementById('loader-container').classList.remove('d-none');
 }
 
+// Hide loading spinner when API calls complete
 function hideLoader() {
     document.getElementById('loader-container').classList.add('d-none');
 }

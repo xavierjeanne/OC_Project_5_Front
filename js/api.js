@@ -1,5 +1,7 @@
+// Base URL for the API endpoints
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
+// Generic function to fetch data from the API with error handling
 async function fetchFromAPI(endpoint, params = {}) {
     const url = new URL(`${API_BASE_URL}${endpoint}`);
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
@@ -18,7 +20,7 @@ async function fetchFromAPI(endpoint, params = {}) {
     }
 }
 
-// Fonction pour récupérer le meilleur film
+// Function to fetch the highest rated movie based on IMDB score and votes
 async function getBestMovie() {
     const data = await fetchFromAPI('/titles/', {
         sort_by: '-imdb_score,-votes',
@@ -33,8 +35,7 @@ async function getBestMovie() {
     return null;
 }
 
-
-// Improved function to check if an image URL is valid
+// Utility function to validate if an image URL is accessible and loads correctly
 async function isImageValid(url) {
     return new Promise((resolve) => {
         // Create a new image object
@@ -62,16 +63,17 @@ async function isImageValid(url) {
     });
 }
 
-// Modify your getMovieDetails function to handle image validation
+// Function to fetch detailed information about a specific movie
+// Includes image URL validation and fallback to placeholder
 async function getMovieDetails(movieId) {
     const movie = await fetchFromAPI(`/titles/${movieId}`);
     
     if (movie) {
-        // Check if the image URL is valid, if not, use a placeholder
+        // Check if the image URL is valid, if not, use a default image
         if (movie.image_url) {
             const isValid = await isImageValid(movie.image_url);
             if (!isValid) {
-                movie.image_url = 'img/logo.png'; // Path to your placeholder image
+                movie.image_url = 'img/logo.png'; 
             }
         } else {
             movie.image_url = 'img/logo.png';
@@ -81,7 +83,7 @@ async function getMovieDetails(movieId) {
     return movie;
 }
 
-// Update getBestRatedMovies to handle image validation
+// Function to get a list of best rated movies, excluding the top movie
 async function getBestRatedMovies(limit = 6) {
     const data = await fetchFromAPI('/titles/', {
         sort_by: '-imdb_score,-votes',
@@ -107,7 +109,7 @@ async function getBestRatedMovies(limit = 6) {
     return [];
 }
 
-// Update getMoviesByGenre to handle image validation
+// Function to fetch movies by specific genre
 async function getMoviesByGenre(genre, limit = 6) {
     const data = await fetchFromAPI('/titles/', {
         genre: genre,
