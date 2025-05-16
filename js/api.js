@@ -12,7 +12,6 @@ async function fetchFromAPI(endpoint, params = {}) {
         if (!response.ok) {
             throw new Error(`Erreur API: ${response.status}`);
         }
-        
         return await response.json();
     } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
@@ -35,30 +34,27 @@ async function getBestMovie() {
     return null;
 }
 
-// Utility function to validate if an image URL is accessible and loads correctly
+// Utility function to check if an image URL exists
 async function isImageValid(url) {
     return new Promise((resolve) => {
-        // Create a new image object
         const img = new Image();
-        
-        // Prevent error from appearing in console
-        img.addEventListener('error', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }, true);
-        
-        // Set up event handlers before setting src
-        img.onload = () => resolve(true);
+        let timeout;
+
+        img.onload = () => {
+            clearTimeout(timeout);
+            resolve(true);
+        };
+
         img.onerror = () => {
-            // Image failed to load (404, CORS, etc.)
-            // Remove console.error to prevent any console output
+            clearTimeout(timeout);
             resolve(false);
         };
-        
-        // Set timeout in case image takes too long
-        setTimeout(() => resolve(false), 2000);
-        
-        // Set the source last
+
+        timeout = setTimeout(() => {
+            // If it takes too long, assume invalid
+            resolve(false);
+        }, 2000);
+
         img.src = url;
     });
 }
@@ -76,6 +72,7 @@ async function getMovieDetails(movieId) {
                 movie.image_url = 'img/logo.png'; 
             }
         } else {
+           
             movie.image_url = 'img/logo.png';
         }
     }

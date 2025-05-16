@@ -668,12 +668,12 @@ function handleGenreResponsiveDisplay(section, genreId) {
 // Display a modal with detailed movie information
 function showMovieModal(movie) {
     // Get the modal elements
+    showLoader();
     const modal = document.getElementById('movieModal');
     const modalImage = document.getElementById('modal-movie-image');
     const modalDetails = document.getElementById('modal-movie-details');
     const modalDescription = document.getElementById('modal-movie-description');
     const modalTitle = document.getElementById('modal-movie-title');
-    
     
     // Set the image source
     modalImage.src = movie.image_url;
@@ -698,13 +698,18 @@ function showMovieModal(movie) {
         <p class="mt-5"><strong>Avec:<br/></strong> ${movie.actors ? movie.actors.join(', ') : 'Distribution non spécifiée'}<br/>
     `;
     modalDescription.innerHTML = descriptionModal;
+
+    // Prévention accessibilité : retire focus et aria-hidden résiduel
     // Initialize the modal using Bootstrap
     const bootstrapModal = new bootstrap.Modal(modal);
-
-    // Add event listener to set aria-hidden when modal is hidden
+    
+    // Add event listener to properly handle modal closing
     modal.addEventListener('hidden.bs.modal', function () {
-        modal.setAttribute('aria-hidden', 'true');
+        // Don't set aria-hidden when modal is closed
+        // This prevents the accessibility error
     }, { once: true });
+    
+    hideLoader();
     // Now show the modal
     bootstrapModal.show();
 }
@@ -718,3 +723,5 @@ function showLoader() {
 function hideLoader() {
     document.getElementById('loader-container').classList.add('d-none');
 }
+
+

@@ -66,20 +66,22 @@
     </main>
 
     <!-- Movie Details Modal -->
-    <div class="modal fade" id="movieModal" tabindex="-1" >
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content p-2">
+    <!-- Modal -->
+    <div class="modal fade" id="movieModal" tabindex="-1" role="dialog" aria-labelledby="modal-movie-title" >
+        <div class="modal-dialog modal-lg" role="document">
+            <!-- Modal content -->
+            <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-10 col-lg-6 ">
-                            <h2 class="modal-title" id="modal-movie-title"></h2>
+                            <h2 class="modal-title" id="modal-movie-title">Détails du film</h2>
                             <div id="modal-movie-details">
                                 
                             </div>
                         </div>
                         <div class="col-2 col-lg-6 d-flex justify-content-end">
                             <button type="button" class="btn-close d-lg-none" data-bs-dismiss="modal" aria-label="Close"></button>
-                            <img id="modal-movie-image" src="" alt="Movie Poster" class="img-fluid mb-3 d-none d-lg-block">
+                            <img id="modal-movie-image" src="img/logo.png" alt="Movie Poster" class="img-fluid mb-3 d-none d-lg-block">
                         </div>
                         <div class="col-12">
                             <div id="modal-movie-description">
